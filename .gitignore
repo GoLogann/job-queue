@@ -19,14 +19,8 @@ ENV/
 *.swp
 *.swo
 
-# Variáveis de ambiente
-.env
-
 # Logs
 *.log
-
-# Docker
-.dockerignore
 
 # OS
 .DS_Store
