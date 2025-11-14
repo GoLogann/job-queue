@@ -2,10 +2,8 @@
 
 ## 📋 Descrição da Questão
 
-**Questão 2**: Desenvolver uma API que processe operações longas (35+ segundos) sob restrições do WAF (Web Application Firewall) que possui timeout de 30 segundos.
-
-### 🎯 **Comando da Questão**
-> *"Criar uma solução que permita o processamento de operações que excedem o timeout do WAF, garantindo que o cliente receba uma resposta imediata e possa acompanhar o progresso da operação através de polling."*
+### 🎯 **Comando da Questão (Original)**
+> *"You have a REST API under a WAF that limits the maximum request time to 30 seconds and also interrupts application processing after request expiration. There is a certain operation, however, that would demand at least 35 seconds to complete. How would you proceed for your user to be able to retrieve the result of this operation?"*
 
 ## 🚀 Solução Implementada
 
@@ -125,54 +123,27 @@ graph TD
 
 ## 🚀 Como Executar
 
-### **Opção 1: Docker Compose (Recomendado)**
+### **Docker Compose (Recomendado)**
 ```bash
-# Iniciar todos os serviços
+# 1. Clonar/acessar o projeto
+cd job-queue
+
+# 2. Criar arquivo de ambiente (opcional - já existe .env)
+cp .env.example .env  # ou usar o .env existente
+
+# 3. Iniciar todos os serviços (Redis, API, Workers, Dashboard)
 docker compose up --build -d
 
-# Verificar status
+# 4. Verificar se todos os containers estão rodando
 docker compose ps
 
-# Ver logs
+# 5. Ver logs em tempo real
 docker compose logs -f
+
+# 6. Testar a API
+curl http://localhost:8000/api/health
 ```
 
-### **Opção 2: Desenvolvimento Local**
-```bash
-# Configurar ambiente
-./setup.sh
-
-# Ativar ambiente virtual
-source venv/bin/activate
-
-# Iniciar Redis
-docker run -d -p 6379:6379 --name redis redis:alpine
-
-# Iniciar API
-python main.py
-
-# Iniciar Worker (novo terminal)
-rq worker --url redis://localhost:6379
-```
-
-## 🧪 Testes
-
-### **Teste Automatizado Completo**
-```bash
-# Executar suite de testes
-./test_questao2.sh
-```
-
-### **Teste Manual Rápido**
-```bash
-# 1. Criar job
-curl -X POST "http://localhost:8000/api/operacao-longa" \
-  -H "Content-Type: application/json" \
-  -d '{"dados": {"teste": true}}'
-
-# 2. Consultar status (usar job_id retornado)
-curl "http://localhost:8000/api/jobs/SEU-JOB-ID"
-```
 
 ## 📊 Validação dos Requisitos
 
@@ -210,7 +181,6 @@ curl "http://localhost:8000/api/jobs/SEU-JOB-ID"
 ### **Tolerância a Falhas**
 - ✅ Retry automático (até 3 tentativas)
 - ✅ TTL de jobs (24 horas)
-- ✅ Health check com status Redis
 - ✅ Graceful shutdown
 
 ### **Escalabilidade**
@@ -224,15 +194,3 @@ curl "http://localhost:8000/api/jobs/SEU-JOB-ID"
 - ✅ Timestamps precisos
 - ✅ Dashboard de jobs
 - ✅ Métricas de performance
-
-## 🎯 **Conclusão**
-
-Esta API **atende completamente aos requisitos da Questão 2**, implementando uma solução robusta que:
-
-1. **Evita timeouts** do WAF através de processamento assíncrono
-2. **Responde imediatamente** com job_id para tracking  
-3. **Processa operações longas** (35+ segundos) em background
-4. **Permite acompanhamento** via polling do status
-5. **Garante persistência** e recuperação de resultados
-
-A solução é **production-ready** com tratamento de erros, retry automático, monitoramento e escalabilidade horizontal.
