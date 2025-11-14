@@ -1,0 +1,15 @@
+# FastAPI e servidor
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Redis e RQ
+redis==5.0.1
+rq==1.15.1
+
+# Retry e utilitários
+tenacity==8.2.3
+
+# Logging e monitoramento
+python-json-logger==2.0.7

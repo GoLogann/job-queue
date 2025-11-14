@@ -1,0 +1,1 @@
+"""Módulo API com rotas e endpoints."""

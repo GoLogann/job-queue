@@ -1,0 +1,1 @@
+"""Módulo de workers para processamento assíncrono."""

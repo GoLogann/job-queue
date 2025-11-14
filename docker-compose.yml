@@ -1,0 +1,77 @@
+services:
+  # Serviço Redis
+  redis:
+    image: redis:7-alpine
+    container_name: questao2-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - app-network
+
+  # Serviço API FastAPI
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: questao2-api
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Worker RQ para processamento em background
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      replicas: 2  # 2 workers para processar jobs em paralelo
+
+  # Dashboard RQ (opcional, para monitoramento)
+  rq-dashboard:
+    image: eoranged/rq-dashboard:latest
+    container_name: questao2-dashboard
+    ports:
+      - "9181:9181"
+    environment:
+      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis_data:
